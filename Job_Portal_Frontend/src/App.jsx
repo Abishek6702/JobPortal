@@ -13,7 +13,7 @@ import ELearning from "./pages/ELearning";
 import Network from "./pages/Network";
 import JobApplicationForm from "./pages/JobApplicationForm";
 import SubmitFormSucess from "./components/SubmitFormSucess";
-import OnboardingForm from './components/OnboardingForm';
+import OnboardingForm from "./components/OnboardingForm";
 import UserProfile from "./pages/UserProfile";
 import JobBoard from "./pages/JobBoard";
 import JobPostForm from "./components/JobPostForm";
@@ -30,8 +30,9 @@ import AutoCarousel from "./components/AutoCarousel";
 import ApplicationListing from "./pages/ApplicationListing";
 import AppliedJobs from "./components/AppliedJobs";
 import LandingPage from "./pages/LandingPage";
+import Profile from "./components/ProfileActivity";
+import Feeds from "./pages/Feeds"
 // import EmployerProfile from "./pages/EmployerProfile";
-
 
 function App() {
   return (
@@ -47,29 +48,32 @@ function App() {
         <Route path="/navbar" element={<Navbar />} />
         <Route path="/jobs" element={<JobBoard />} />
         <Route path="/resumes" element={<Resumes />} />
-        <Route path="/companies" element={<Companies />} /> 
+        <Route path="/companies" element={<Companies />} />
         <Route path="/e-learning" element={<ELearning />} />
         <Route path="/network" element={<Network />} />
         <Route path="/jobapplicationform" element={<JobApplicationForm />} />
-        <Route path="/submitsucess" element={<SubmitFormSucess/>}/>
-        <Route path="/onbordingform" element={<OnboardingForm/>}/>
-        <Route path="/profile" element={<UserProfile/>}/>
-        <Route path="/job-post" element={<JobPostForm/>}/>
-        <Route path="/Employer-sidebar" element={<EmployerSideBar/>}/>
-        <Route path="/footer" element={<Footer/>}/>
-        <Route path="/job-sucess" element={<JobPostSucess/>}/>
-        <Route path="/job-list" element={<JobList/>}/>
-        <Route path="/company-post" element={<CompanyPostForm/>}/>
-        <Route path="/delete-confirm" element={<DeleteConfirmation/>}/>
-        <Route path="/exit-confirm" element={<ExitConfirmation/>}/>
-        <Route path="/employer-navbar" element={<EmployerNavbar/>}/>
-        <Route path="/signup" element={<SignupForm/>}/>
-        <Route path="/curousel" element={<AutoCarousel/>}/>
-        <Route path="/job-application/:jobId" element={<ApplicationListing/>}/>
-        <Route path="/applied-jobs" element={<AppliedJobs/>}/>
-        <Route path="/landing" element={<LandingPage/>}/>
-        
-
+        <Route path="/submitsucess" element={<SubmitFormSucess />} />
+        <Route path="/onbordingform" element={<OnboardingForm />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/job-post" element={<JobPostForm />} />
+        <Route path="/Employer-sidebar" element={<EmployerSideBar />} />
+        <Route path="/footer" element={<Footer />} />
+        <Route path="/job-sucess" element={<JobPostSucess />} />
+        <Route path="/job-list" element={<JobList />} />
+        <Route path="/company-post" element={<CompanyPostForm />} />
+        <Route path="/delete-confirm" element={<DeleteConfirmation />} />
+        <Route path="/exit-confirm" element={<ExitConfirmation />} />
+        <Route path="/employer-navbar" element={<EmployerNavbar />} />
+        <Route path="/signup" element={<SignupForm />} />
+        <Route path="/curousel" element={<AutoCarousel />} />
+        <Route
+          path="/job-application/:jobId"
+          element={<ApplicationListing />}
+        />
+        <Route path="/applied-jobs" element={<AppliedJobs />} />
+        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/feeds" element={<Feeds />} />
       </Routes>
     </>
   );

@@ -67,7 +67,7 @@ const JobDetailModel = ({ job, handleClose }) => {
         <div className="flex gap-4">
           <button className="bg-blue-600 text-white font-bold py-2 px-4 rounded-xl cursor-pointer flex gap-2 items-center" onClick={() => setIsEditing(true)}>
             <img src={edit_icon} className="w-4 h-4" />
-            Edit
+            Edit 
           </button>
           {isEditing && (
         <JobUpdateForm

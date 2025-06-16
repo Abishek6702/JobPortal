@@ -53,7 +53,7 @@ const Navbar = () => {
 
         <div className="hidden sm:flex gap-6 text-sm font-medium text-gray-600 text-[16px] items-center">
           <NavLink
-            to="/employee-dashboard"
+            to="/feeds"
             className={({ isActive }) =>
               `flex items-center gap-1 ${
                 isActive ? "text-blue-600 font-semibold" : "text-gray-600"

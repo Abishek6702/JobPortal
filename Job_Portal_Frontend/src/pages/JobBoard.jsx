@@ -125,7 +125,6 @@ const JobBoard = () => {
         </div>
         {/* Main Grid */}
         <div className="grid grid-cols-12 gap-6 relative">
-         
           <div className="col-span-12 md:col-span-3">
             <div className="bg-white border rounded-lg p-6 sticky top-10">
               <div className="flex justify-between items-center mb-4">
