@@ -50,16 +50,16 @@ const CompanyDetails = ({ companyDetails, setFullScreeen, fullScreen }) => {
     console.log("job id for job : ", visibleJobs);
   }
   const getAppliedJobsFromToken = () => {
-      const token = localStorage.getItem("token"); // Get token from localStorage (or wherever you store it)
-      if (token) {
-        const decodedToken = jwtDecode(token);
-        console.log("token decoded",decodedToken);
-        return decodedToken.appliedjobs || []; // Assuming the appliedJobs are in the token
-      }
-      return [];
-    };
-  
-    const appliedJobs = getAppliedJobsFromToken();
+    const token = localStorage.getItem("token"); // Get token from localStorage (or wherever you store it)
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      console.log("token decoded", decodedToken);
+      return decodedToken.appliedjobs || []; // Assuming the appliedJobs are in the token
+    }
+    return [];
+  };
+
+  const appliedJobs = getAppliedJobsFromToken();
 
   return (
     <div
@@ -70,80 +70,6 @@ const CompanyDetails = ({ companyDetails, setFullScreeen, fullScreen }) => {
       }`}
     >
       <div className="flex justify-between items-start relative h-fit ">
-        <div className="absolute right-0 flex gap-4">
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 40 40"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="cursor-pointer"
-          >
-            <rect
-              x="0.5"
-              y="0.5"
-              width="39"
-              height="39"
-              rx="19.5"
-              stroke="#E5EAE8"
-            />
-            <path
-              d="M12.0197 21.5C11.1907 21.5 10.5146 20.829 10.5146 20C10.5146 19.171 11.1816 18.5 12.0096 18.5H12.0197C12.8487 18.5 13.5197 19.171 13.5197 20C13.5197 20.829 12.8487 21.5 12.0197 21.5ZM20.0197 21.5C19.1907 21.5 18.5146 20.829 18.5146 20C18.5146 19.171 19.1816 18.5 20.0096 18.5H20.0197C20.8487 18.5 21.5197 19.171 21.5197 20C21.5197 20.829 20.8487 21.5 20.0197 21.5ZM28.0197 21.5C27.1907 21.5 26.5146 20.829 26.5146 20C26.5146 19.171 27.1816 18.5 28.0096 18.5H28.0197C28.8487 18.5 29.5197 19.171 29.5197 20C29.5197 20.829 28.8487 21.5 28.0197 21.5Z"
-              fill="black"
-            />
-          </svg>
-          {fullScreen ? (
-            <svg
-              onClick={() => setFullScreeen(!fullScreen)}
-              width="40"
-              height="40"
-              viewBox="0 0 40 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect
-                x="0.5"
-                y="0.5"
-                width="39"
-                height="39"
-                rx="19.5"
-                stroke="#E5EAE8"
-              />
-              <path
-                d="M26 14L14 26M26 26L14 14"
-                stroke="black"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-          ) : (
-            <svg
-              onClick={() => setFullScreeen(!fullScreen)}
-              width="40"
-              height="40"
-              viewBox="0 0 40 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="cursor-pointer"
-            >
-              <rect
-                x="0.5"
-                y="0.5"
-                width="39"
-                height="39"
-                rx="19.5"
-                stroke="#E5EAE8"
-              />
-              <path
-                d="M22.0004 17.9996L29 11M29 11L23.8572 11M29 11L28.9999 16.1426M18.0004 22L11.0004 29M11.0004 29L16.1433 29M11.0004 29L11.0005 23.8574M22.0004 22L29 28.9996M29 28.9996L29 23.8569M29 28.9996L23.8573 28.9995M18.0004 18.0004L11 11M11 11L11 16.1427M11 11L16.1427 11.0001"
-                stroke="#141514"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          )}
-        </div>
         <div className="w-full">
           <div className="flex items-center gap-3">
             <img
@@ -304,7 +230,7 @@ const CompanyDetails = ({ companyDetails, setFullScreeen, fullScreen }) => {
                         if (job.applyMethod === "Easy Apply") {
                           navigate("/jobapplicationform", {
                             state: {
-                              job
+                              job,
                             },
                           });
                         } else {

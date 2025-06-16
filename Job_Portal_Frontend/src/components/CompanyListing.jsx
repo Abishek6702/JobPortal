@@ -1,19 +1,31 @@
 import React from "react";
-import logo from "../assets/logo1.jpg";
 
-const CompanyListing = ({ company_props, setCompanyDetails }) => {
-  // console.log("companies : ", company_props);
+const CompanyListing = ({ company_props, setCompanyDetails, activeCompany  }) => {
+  const formatEmployeeCount = (count) => {
+    if (count >= 1_000_000) {
+      return (count / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    } else if (count >= 1_000) {
+      return (count / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+    }
+    return count.toString();
+  };
+
   return (
     <>
       <div className="main_conatiner col-span-12 md:col-span-4 w-full  mt-4 ">
         <div className="card-container cursor-pointer">
           {company_props.map((item, index) => {
+              const isActive = activeCompany && item._id === activeCompany._id;
             return (
               <div
+               key={item._id}
                 onClick={() => setCompanyDetails(item)}
-                className=" rounded-lg  p-6 border border-gray-300  m-auto mb-4"
-                
-              >
+                 className={`rounded-lg p-4 border m-auto mb-4 ${
+                isActive
+                  ? "border-blue-300 bg-gray-50 " 
+                  : "border-gray-300"
+              }`}
+            >
                 <div className="flex  justify-between">
                   <div className="flex gap-4 items-center">
                     <img
@@ -42,24 +54,15 @@ const CompanyListing = ({ company_props, setCompanyDetails }) => {
                   </div>
                 </div>
 
-                <div className="">
-                  <p className="text-sm mt-4">{item.company_type}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <p className="text-sm text-gray-400 ">
-                      {item.location}
-                    </p>
+                <div className=" flex items-center justify-between  ">
+                  <div className=" justify-between items-center mt-2">
+                    <p className="text-sm text-gray-400 ">{item.location}</p>
                     <p className="text-sm text-gray-400">
-                      {item.employee_count} Employees
+                      {formatEmployeeCount(item.employee_count)} Employees
                     </p>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 mt-6">
                   <span className="px-4 py-1 border  text-blue-600 rounded-2xl text-sm font-semibold">
-                  {(item.jobs?.length || 0) + " Jobs"}
-                  </span>
-                  <span className="px-4 py-1  bg-[#E6FCF1] text-blue-600 rounded-2xl text-sm font-semibold">
-                    {item.tags || "High Benefit"}
+                    {(item.jobs?.length || 0) + " Jobs"}
                   </span>
                 </div>
               </div>
