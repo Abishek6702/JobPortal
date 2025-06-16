@@ -51,13 +51,13 @@ const LoginForm = () => {
           break;
         case "employee":
           if (onboardingComplete) {
-            navigate("/employee-dashboard");
+            navigate("/feeds");
           } else {
             navigate("/onbordingform");
           }
           break;
         case "employer":
-          navigate("/employer-dashboard");
+          navigate("/feeds");
           break;
         case "instructor":
           navigate("/instructor-dashboard");
