@@ -1,3 +1,10 @@
+import {
+  Bookmark,
+  Heart,
+  MessageCircle,
+  SendHorizonal,
+  Share2,
+} from "lucide-react";
 import React, { useState } from "react";
 const Post = ({ post }) => {
   const [likes, setLikes] = useState(post?.stats?.likes || 0);
@@ -27,7 +34,7 @@ const Post = ({ post }) => {
   return (
     <div className="w-[100%] mx-auto  bg-white rounded-xl shadow-md border border-gray-200">
       {/* Header */}
-      <div className="profile-container flex items-center justify-between" >
+      <div className="profile-container flex items-center justify-between">
         <div className="flex items-center gap-3 p-4">
           <img
             src={post.user.avatar}
@@ -76,85 +83,33 @@ const Post = ({ post }) => {
               setLikes(likes + (liked ? -1 : 1));
             }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill={liked ? "currentColor" : "none"}
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 15l7-7 7 7"
-              />
-            </svg>
+            <Heart />
             <span className="text-sm">{likes} Likes</span>
           </button>
           <div className="flex items-center gap-1">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8h2a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V10a2 2 0 012-2h2"
-              />
-            </svg>
+            <MessageCircle />
             <span className="text-sm">{comments} Comments</span>
           </div>
           <button onClick={handleShare} className="flex items-center gap-1">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 17h5l-1.405-1.405M19 13V7a2 2 0 00-2-2H7a2 2 0 00-2 2v6m14 0a2 2 0 01-2 2H7a2 2 0 01-2-2"
-              />
-            </svg>
+            <Share2 />
             <span className="text-sm">{shares} Share</span>
           </button>
         </div>
-        <button
+        {/* <button
           className={`flex items-center gap-1 ${saved ? "text-blue-600" : ""}`}
           onClick={() => {
             setSaved(!saved);
             setSavedCount(savedCount + (saved ? -1 : 1));
           }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill={saved ? "currentColor" : "none"}
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z"
-            />
-          </svg>
+          <Bookmark />
           <span className="text-sm">{savedCount} Saved</span>
-        </button>
+        </button> */}
       </div>
       {/* Comment Box */}
       <form
         onSubmit={handleCommentSubmit}
-        className="flex items-center border-t border-gray-400 px-4 py-2"
+        className="flex items-center border-t border-gray-300 px-4 py-2"
       >
         <img
           src={post.user.avatar}
@@ -165,24 +120,12 @@ const Post = ({ post }) => {
           type="text"
           value={commentInput}
           onChange={(e) => setCommentInput(e.target.value)}
-          className="flex-1 border border-gray-400 outline-none p-2 rounded-xl text-sm"
+          className="flex-1 border border-gray-400 outline-none p-2 rounded-xl text-sm relative "
           placeholder="Write your comment..."
         />
+        {/* <MessageCircle className="absolute"/> */}
         <button type="submit" className="ml-2 text-blue-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 12h14M12 5l7 7-7 7"
-            />
-          </svg>
+          <SendHorizonal />
         </button>
       </form>
     </div>

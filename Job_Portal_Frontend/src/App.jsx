@@ -1,4 +1,7 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import LoginForm from "./components/LoginForm";
 import ForgotPassword from "./components/ForgotPassword";
 import VerifyOtp from "./components/VerifyOtp";
@@ -37,6 +40,7 @@ import Feeds from "./pages/Feeds"
 function App() {
   return (
     <>
+    <ToastContainer position="top-right" autoClose={1500} />
       <Routes>
         <Route path="/" element={<LoginForm />} />
         <Route path="/forget-password" element={<ForgotPassword />} />

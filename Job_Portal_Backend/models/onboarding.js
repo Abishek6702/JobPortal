@@ -1,5 +1,30 @@
 const mongoose = require("mongoose");
 
+const educationSchema = new mongoose.Schema(
+  {
+    level: String,
+    institution: String,
+    university: String,
+    branch: String,
+    yearFrom: Number,
+    yearTo: Number,
+    marks: String,
+  },
+  { _id: false }
+);
+
+const experienceSchema = new mongoose.Schema(
+  {
+    company: String,
+    yearFrom: Number,
+    yearTo: Number,
+    title: String,
+    location: String,
+    description: String,
+  },
+  { _id: false }
+);
+
 const onboardingSchema = new mongoose.Schema(
   {
     userId: {
@@ -8,49 +33,17 @@ const onboardingSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-    },
-    location: {
-      type: String,
-      required: true,
-    },
-    postalcode: {
-      type: String,
-      required: true,
-    },
-    salary: {
-      type: Number,
-      required: true,
-    },
-    salaryperiod: {
-      type: String,
-      required: true,
-    },
-    jobtitle: {
-      type: String,
-      required: true,
-    },
-    profileImage: { type: String }, // image URL or path
-    resume: { type: String }, // file URL or path
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    location: { type: String, required: true },
+    education: [educationSchema],
+    experience: [experienceSchema],
+    preferredRoles: [{ type: String }],
+    salaryExpectation: { type: Number },
+    profileImage: { type: String },
+    resume: { type: String },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const Onboarding = mongoose.model("Onboarding", onboardingSchema);
-module.exports = Onboarding;
+module.exports = mongoose.model("Onboarding", onboardingSchema);

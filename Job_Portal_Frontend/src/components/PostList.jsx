@@ -32,7 +32,7 @@ const posts = [
       shares: 24,
       saved: 3,
     },
-     postedAt: "2 hours ago",
+     postedAt: "14 hours ago",
   },
    {
     user: {
@@ -48,7 +48,7 @@ const posts = [
       shares: 98,
       saved: 20,
     },
-     postedAt: "2 hours ago",
+     postedAt: "1 day ago",
   },
   {
     user: {
@@ -64,7 +64,7 @@ const posts = [
       shares: 120,
       saved: 15,
     },
-     postedAt: "2 hours ago",
+     postedAt: "1 day ago",
   },
   {
     user: {
@@ -80,7 +80,7 @@ const posts = [
       shares: 22,
       saved: 6,
     },
-     postedAt: "2 hours ago",
+     postedAt: "2 day ago",
   },
   {
     user: {
@@ -96,7 +96,7 @@ const posts = [
       shares: 34,
       saved: 9,
     },
-     postedAt: "2 hours ago",
+     postedAt: "6 day ago",
   },
   // Add more posts as needed
 ];

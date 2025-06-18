@@ -51,8 +51,10 @@ const JobList = () => {
         }
 
         const jobsRes = await fetch("http://localhost:3000/api/jobs", {
+          
           headers: { Authorization: `Bearer ${token}` },
         });
+        
         const allJobs = await jobsRes.json();
 
         const myCompanyIds = myCompanies.map((c) => c._id);
@@ -71,6 +73,7 @@ const JobList = () => {
 
     fetchJobsForEmployer();
   }, []);
+  console.log("jobs",jobs)
 
   const timeAgo = (postedAt) => {
     const postedDate = new Date(postedAt);

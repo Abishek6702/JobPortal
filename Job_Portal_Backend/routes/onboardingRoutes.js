@@ -1,20 +1,35 @@
-const express = require('express');
-const { updateOnboardingStep, saveOnboardingProgress, getOnboardingStatus, updateProfileImage, updateResume, updateOnboardingFields } =require('../controllers/onboardingController.js');
-const {verifyToken} = require('../middlewares/authMiddleware.js');
-const upload = require('../middlewares/upload');
 
+
+const express = require("express");
 const router = express.Router();
+const upload = require("../middlewares/onboardFiles"); // Multer config as above
+const { verifyToken } = require("../middlewares/authMiddleware");
+const { saveOrUpdateOnboarding, getOnboarding, updateProfileImage, updateResume } = require("../controllers/onboardingController");
 
-router.post('/update', verifyToken, updateOnboardingStep);
-router.post("/save-progress",verifyToken, saveOnboardingProgress);
 
-// Route to get onboarding progress status
-router.get("/onboarding-status/:userId",verifyToken, getOnboardingStatus);
-router.put('/profile-image', verifyToken, upload.single('profileImage'), updateProfileImage);
-// Route to update onboarding fields (excluding image and resume)
-router.put('/onboarding/fields', verifyToken, updateOnboardingFields);
+router.post(
+  "/onboarding",
+  verifyToken,
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "resume", maxCount: 1 },
+  ]),
+  saveOrUpdateOnboarding
+);
 
-// Upload resume
-router.put('/resume', verifyToken, upload.single('resume'), updateResume);
+
+router.get("/onboarding/:userId", verifyToken, getOnboarding);
+
+router.put('/profile-image', 
+  verifyToken, 
+  upload.single('profileImage'), 
+  updateProfileImage
+);
+
+router.put('/resume', 
+  verifyToken, 
+  upload.single('resume'), 
+  updateResume
+);
 
 module.exports = router;

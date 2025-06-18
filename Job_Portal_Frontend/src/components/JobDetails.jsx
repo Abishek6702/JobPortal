@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppProvider";
 
 const JobDetails = ({onClose, job, isExpanded }) => {
+  console.log("company",job)
   const navigate = useNavigate();
   const descriptionRef = useRef(null);
   const requirementRef = useRef(null);
