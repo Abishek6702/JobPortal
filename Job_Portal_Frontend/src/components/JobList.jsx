@@ -51,19 +51,21 @@ const JobList = () => {
         }
 
         const jobsRes = await fetch("http://localhost:3000/api/jobs", {
-          
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
         const allJobs = await jobsRes.json();
 
         const myCompanyIds = myCompanies.map((c) => c._id);
+        console.log("my company id", myCompanyIds);
+        console.log("all jobs", allJobs);
         const myJobs = allJobs.filter((job) =>
-          myCompanyIds.includes(job.companyId)
+          myCompanyIds.includes(job.companyId._id)
         );
 
         setJobs(myJobs);
-        setFilteredJobs(myJobs); // Set filtered jobs initially to all jobs
+        setFilteredJobs(myJobs);
+        console.log("Fetched jobs:", myJobs); // Set filtered jobs initially to all jobs
       } catch (error) {
         console.error("Error fetching jobs:", error);
       } finally {
@@ -73,7 +75,7 @@ const JobList = () => {
 
     fetchJobsForEmployer();
   }, []);
-  console.log("jobs",jobs)
+  console.log("jobs", jobs);
 
   const timeAgo = (postedAt) => {
     const postedDate = new Date(postedAt);
@@ -120,7 +122,9 @@ const JobList = () => {
 
       // Check combined filter (company name and job title)
       const matchesSearch =
-        job.companyName.toLowerCase().includes(lowerCaseSearchFilter) ||
+        job.companyId.company_name
+          .toLowerCase()
+          .includes(lowerCaseSearchFilter) ||
         job.position.toLowerCase().includes(lowerCaseSearchFilter);
 
       // Check location filter
@@ -238,6 +242,7 @@ const JobList = () => {
         <p>No jobs found for your companies.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {console.log("mapping job", filteredJobs)}
           {filteredJobs.map((job) => (
             <div
               className="card_container "
@@ -246,16 +251,15 @@ const JobList = () => {
             >
               <div className="card w-full">
                 <div className="relative card-container border border-gray-300 rounded-md p-4 h-full flex flex-col justify-between">
-                  {/* Top Row: Company Info & Bookmark */}
                   <div className="card-title flex items-center justify-between">
                     <div className="company-name flex gap-2">
                       <img
-                        src={`http://localhost:3000/${job.companyLogo}`}
+                        src={`http://localhost:3000/${job.companyId.company_logo}`}
                         alt="Company Logo"
                         className="w-6 h-6 rounded-full object-cover"
                       />
                       <p className="text-gray-500 font-medium">
-                        {job.companyName}
+                        {job.companyId.company_name}
                       </p>
                     </div>
                   </div>

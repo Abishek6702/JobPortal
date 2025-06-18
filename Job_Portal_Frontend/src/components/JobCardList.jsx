@@ -14,12 +14,9 @@ const getDaysAgo = (postedAt) => {
 };
 
 const JobCardList = ({ jobs, onSelectJob, selectedJob }) => {
-  const { savedJobs, toggleSaveJob, appliedJobs  } = useAppContext();
+  const { savedJobs, toggleSaveJob, appliedJobs } = useAppContext();
 
   const navigate = useNavigate();
-
- 
-
 
   return (
     <>
@@ -41,12 +38,14 @@ const JobCardList = ({ jobs, onSelectJob, selectedJob }) => {
               <div className="card-title flex items-center justify-between">
                 <div className="company-name flex gap-2 ">
                   <img
-                    src={`http://localhost:3000/${job.companyLogo}`} // fallback image if logo is null
+                    src={`http://localhost:3000/${job.companyId.company_logo}`} // fallback image if logo is null
                     alt="Company Logo"
                     className="w-6 h-6 rounded-full object-cover"
                   />
 
-                  <p className="text-gray-500 font-medium">{job.companyName}</p>
+                  <p className="text-gray-500 font-medium">
+                    {job.companyId.company_name}
+                  </p>
                 </div>
                 <div className="not-saved">
                   {savedJobs.includes(job._id) ? (
@@ -103,27 +102,19 @@ const JobCardList = ({ jobs, onSelectJob, selectedJob }) => {
                   <button
                     className="border-2 border-blue-700 bg-white rounded-full py-2 px-4 text-blue-700 font-bold cursor-pointer w-full md:w-auto"
                     onClick={() => {
-                      if (job.applyMethod === "Easy Apply") {
+                      if (!isApplied) {
                         navigate("/jobapplicationform", {
                           state: {
                             job,
                           },
                         });
-                      } else {
-                        window.open(job.applyMethod, "_blank");
                       }
                     }}
                     disabled={isApplied}
                   >
-                    {isApplied
-                    ? "Applied"
-                    : job.applyMethod === "Easy Apply"
-                    ? "Easy Apply"
-                    : "Apply Link"}
+                    {isApplied ? "Applied" : "Easy Apply"}
                   </button>
-                  <button className="border border-white rounded-full py-2 px-4 bg-blue-100 text-blue-700 font-bold cursor-pointer w-full md:w-auto">
-                    Multiple Candidate
-                  </button>
+
                 </div>
 
                 <div className="posted-date">

@@ -22,7 +22,9 @@ export default function CompanyPostForm() {
     followers_count: 0,
     employee_count: 0,
     site_url: "",
-    about: {
+    founded:0,
+    revenue:""
+,    about: {
       content: "",
       contact_info: "",
       stock_value: "",
@@ -83,6 +85,8 @@ export default function CompanyPostForm() {
       form.append("followers_count", formData.followers_count);
       form.append("employee_count", formData.employee_count);
       form.append("site_url", formData.site_url);
+      form.append("founded", formData.founded);
+      form.append("revenue", formData.revenue);
 
       form.append("about", JSON.stringify(formData.about));
       form.append("people", JSON.stringify(formData.people));
@@ -168,8 +172,8 @@ export default function CompanyPostForm() {
 
       {/* Step 0: Company Info */}
       {step === 0 && (
-        <div className="flex flex-col space-y-4 w-[80%] m-auto">
-          <div>
+        <div className="flex flex-wrap gap-4 w-[80%] m-auto items-center justify-center">
+          <div className="w-[45%]">
             <label className="block text-lg font-semibold mb-1">Company Name</label>
             <input
               className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none"
@@ -179,10 +183,10 @@ export default function CompanyPostForm() {
             />
           </div>
 
-          <div>
+          <div className="w-[45%]">
             <label className="block text-lg font-semibold mb-1">Company Type</label>
             <select
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-2 rounded"
               value={formData.company_type}
               onChange={(e) => handleChange("company_type", e.target.value)}
             >
@@ -191,7 +195,7 @@ export default function CompanyPostForm() {
             </select>
           </div>
 
-          <div>
+          <div className="w-[45%]">
             <label className="block text-lg font-semibold mb-1">Location</label>
             <input
               className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none"
@@ -201,7 +205,7 @@ export default function CompanyPostForm() {
             />
           </div>
 
-          <div>
+          <div className="w-[45%]">
             <label className="block text-lg font-semibold mb-1">Followers Count</label>
             <input
               type="number"
@@ -211,7 +215,7 @@ export default function CompanyPostForm() {
             />
           </div>
 
-          <div>
+          <div className="w-[45%]">
             <label className="block text-lg font-semibold mb-1">Employee Count</label>
             <input
               type="number"
@@ -221,13 +225,32 @@ export default function CompanyPostForm() {
             />
           </div>
 
-          <div>
+          <div className="w-[45%]">
             <label className="block text-lg font-semibold mb-1">Website URL</label>
             <input
               className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none"
               placeholder="https://..."
               value={formData.site_url}
               onChange={(e) => handleChange("site_url", e.target.value)}
+            />
+          </div>
+          <div className="w-[45%]">
+            <label className="block text-lg font-semibold mb-1">Founded</label>
+            <input
+              type="number"
+              className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none"
+              value={formData.founded}
+              onChange={(e) => handleChange("founded", e.target.value)}
+            />
+          </div>
+
+          <div className="w-[45%]">
+            <label className="block text-lg font-semibold mb-1">Revenue</label>
+            <input
+              className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none"
+              placeholder="10M"
+              value={formData.revenue}
+              onChange={(e) => handleChange("revenue", e.target.value)}
             />
           </div>
         </div>

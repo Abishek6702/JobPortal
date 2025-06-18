@@ -51,7 +51,7 @@ const SelectedNotSelected = () => {
 
         const myCompanyIds = myCompanies.map((c) => c._id);
         const myJobs = allJobs.filter((job) =>
-          myCompanyIds.includes(job.companyId)
+          myCompanyIds.includes(job.companyId._id)
         );
 
         setJobs(myJobs);
@@ -111,7 +111,7 @@ const SelectedNotSelected = () => {
 
       // Check combined filter (company name and job title)
       const matchesSearch =
-        job.companyName.toLowerCase().includes(lowerCaseSearchFilter) ||
+        job.companyId.company_name.toLowerCase().includes(lowerCaseSearchFilter) ||
         job.position.toLowerCase().includes(lowerCaseSearchFilter);
 
       // Check location filter
@@ -200,12 +200,12 @@ const SelectedNotSelected = () => {
                       <div className="card-title flex items-center justify-between">
                         <div className="company-name flex gap-2">
                           <img
-                            src={`http://localhost:3000/${job.companyLogo}`}
+                            src={`http://localhost:3000/${job.companyId.company_logo}`}
                             alt="Company Logo"
                             className="w-6 h-6 rounded-full object-cover"
                           />
                           <p className="text-gray-500 font-medium">
-                            {job.companyName}
+                            {job.companyId.company_name}
                           </p>
                         </div>
                       </div>
