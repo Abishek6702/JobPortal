@@ -19,16 +19,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  completedStages: { type: [String], default: [] },
-  currentStep: { type: String, default: "step1" },
+
   firstTimeLogin: {
     type: Boolean,
     default: true,
   },
-   savedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
-   appliedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
-
-  
+  savedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
+  appliedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
 });
 
 userSchema.pre("save", async function (next) {

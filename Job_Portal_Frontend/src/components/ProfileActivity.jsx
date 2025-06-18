@@ -11,7 +11,7 @@ const avatars = [
 
 export default function ProfileActivity() {
   return (
-    <div className="bg-white rounded-xl shadow p-4">
+    <div className="bg-white rounded-xl shadow p-4 w-[95%]">
       <h2 className="font-semibold text-gray-800 text-base mb-3">Profile Activity</h2>
       <div className="bg-blue-50 rounded-lg p-4 flex flex-col items-start">
         <div className="flex -space-x-2  mb-3">

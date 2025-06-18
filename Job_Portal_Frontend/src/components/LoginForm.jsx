@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import AutoCarousel from "./AutoCarousel";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -42,6 +43,7 @@ const LoginForm = () => {
       const role = decoded.role;
       const onboardingComplete = decoded.onboardingstatus;
       console.log("token decoded", decoded);
+      toast.success("Login Sucessfull")
 
       setSuccess("Login successful!");
 
@@ -57,7 +59,7 @@ const LoginForm = () => {
           }
           break;
         case "employer":
-          navigate("/feeds");
+          navigate("/employer-dashboard");
           break;
         case "instructor":
           navigate("/instructor-dashboard");

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff, UserRound, Building2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AutoCarousel from "./AutoCarousel";
+import { toast } from 'react-toastify';
 
 const SignupForm = () => {
   const [apiError, setApiError] = useState("");
@@ -164,6 +165,7 @@ const SignupForm = () => {
       } else {
         alert("OTP verified successfully!");
         setVerifyEmail("");
+        toast.success("Otp Verified")
         setOtp("");
         setOtpError("");
         setShowOtpField(false);

@@ -121,12 +121,12 @@ const JobDetailModel = ({ job, handleClose }) => {
             <div className="company flex items-center justify-between">
               <div className="company-icon flex items-center gap-2">
                 <img
-                  src={`http://localhost:3000/${job.companyLogo}`}
+                  src={`http://localhost:3000/${job.companyId.company_logo}`}
                   alt="Company Logo"
                   className="w-6 h-6 rounded-full object-cover"
                 />
                 <p className="text-[#6532C1] font-semibold">
-                  {job.companyName}
+                  {job.companyId.company_name}
                 </p>
               </div>
             </div>
@@ -140,76 +140,19 @@ const JobDetailModel = ({ job, handleClose }) => {
               </p>
             </div>
 
-            <div className="apply-btn pt-5 lg:pt-0">
-              <button
-                className="border border-white rounded-full py-2 px-4 bg-[#2986CE] text-white font-bold cursor-pointer flex gap-2 items-center"
-                onClick={() => {
-                  if (job.applyMethod === "Easy Apply") {
-                    navigate("/jobapplicationform", {
-                      state: {
-                        companyName: job.companyName,
-                        companyLogo: job.companyLogo,
-                        jobLocation: job.location,
-                        jobTitle: job.position,
-                      },
-                    });
-                  } else {
-                    window.open(job.applyMethod, "_blank");
-                  }
-                }}
-              >
-                {job.applyMethod === "Easy Apply" && (
-                  <svg
-                    width="16"
-                    height="20"
-                    viewBox="0 0 16 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M6.00001 19.75C5.91001 19.75 5.81903 19.7341 5.73103 19.7001C5.44103 19.5891 5.25001 19.31 5.25001 19V11.75H1.00001C0.704014 11.75 0.436017 11.576 0.315017 11.305C0.194017 11.034 0.245031 10.718 0.442031 10.498L9.44203 0.498041C9.65003 0.267041 9.97802 0.188043 10.268 0.300043C10.558 0.411043 10.749 0.69004 10.749 1.00004V8.25004H15C15.296 8.25004 15.564 8.42405 15.685 8.69505C15.806 8.96605 15.755 9.28204 15.558 9.50204L6.558 19.5021C6.413 19.6631 6.20801 19.75 6.00001 19.75ZM2.68404 10.25H6.00001C6.41401 10.25 6.75001 10.586 6.75001 11V17.046L13.316 9.75004H10C9.58601 9.75004 9.25001 9.41404 9.25001 9.00004V2.95403L2.68404 10.25Z"
-                      fill="white"
-                    />
-                  </svg>
-                )}
-                {job.applyMethod === "Easy Apply" ? "Easy Apply" : "Apply Link"}
-              </button>
-            </div>
+            
           </div>
         </div>
 
         {/* Interview Process Details */}
         <div className="interview-process mt-6">
           <div className="space-y-2 text-sm">
-            <p>
-              <span className="font-semibold">Where you'll do it:</span>
-              {job.whereYouWillDoIt}
-            </p>
+            
             <p>
               <span className="font-semibold">The Interview Process:</span>
               {job.interviewProcess}
             </p>
-            <p>
-              <span className="font-semibold">Tools:</span>
-              {job.tools?.map((tool, index) => (
-                <span key={index}>
-                  {tool}
-                  {index < job.tools.length - 1 && ", "}
-                </span>
-              ))}
-            </p>
-            <p>
-              <span className="font-semibold">Reporting to:</span>
-              {job.reportingTo?.map((report, index) => (
-                <span key={index}>
-                  {report}
-                  {index < job.reportingTo.length - 1 && ", "}
-                </span>
-              ))}
-            </p>
-            <p>
-              <span className="font-semibold">Your team:</span> {job.team}
-            </p>
+          
           </div>
         </div>
 
@@ -290,34 +233,28 @@ const JobDetailModel = ({ job, handleClose }) => {
           <h2 className="text-xl font-bold text-gray-600">Overview</h2>
           <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
             <div>
-              <strong>Size:</strong> {job.companyOverview?.size || "N/A"}
+              <strong>Size:</strong> {job.companyId.employee_count}
             </div>
             <div>
-              <strong>Founded:</strong> {job.companyOverview?.founded || "N/A"}
+              <strong>Founded:</strong> {job.companyId.founded}
             </div>
             <div>
               <strong>Type:</strong> Company -{" "}
-              {job.companyOverview?.type || "N/A"}
+              {job.companyId.company_type}
             </div>
+            
             <div>
-              <strong>Industry:</strong>{" "}
-              {job.companyOverview?.industry || "N/A"}
-            </div>
-            <div>
-              <strong>Sector:</strong> {job.companyOverview?.sector || "N/A"}
-            </div>
-            <div>
-              <strong>Revenue:</strong> {job.companyOverview?.revenue || "N/A"}
+              <strong>Revenue:</strong> {job.companyId.revenue }
             </div>
           </div>
 
           {/* Images */}
-          {job.companyOverview?.companyImages?.length > 0 && (
+          {job.companyId.images.length > 0 && (
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
               <div className="col-span-1 sm:col-span-2 lg:col-span-6">
                 <div className="w-full h-48 sm:h-64 lg:h-full">
                   <img
-                    src={`http://localhost:3000/${job.companyOverview.companyImages[0]}`}
+                    src={`http://localhost:3000/${job.companyId.images[0]}`}
                     alt="Company"
                     className="w-full h-full rounded-md object-cover"
                   />
@@ -325,7 +262,7 @@ const JobDetailModel = ({ job, handleClose }) => {
               </div>
 
               <div className="col-span-1 sm:col-span-2 lg:col-span-6 grid grid-cols-2 gap-4">
-                {job.companyOverview.companyImages
+                {job.companyId.images
                   .slice(1, 5)
                   .map((img, index) => (
                     <div key={index} className="h-32 sm:h-40">

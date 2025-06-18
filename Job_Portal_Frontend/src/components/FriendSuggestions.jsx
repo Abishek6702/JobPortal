@@ -36,14 +36,14 @@ export default function FriendSuggestions() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 mb-6 ">
+    <div className="bg-white rounded-xl shadow p-4 mb-6  w-[95%]">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="font-semibold text-gray-800 text-base">Friend Suggestions</h2>
+        <h2 className="font-semibold text-gray-800 text-base">Suggested For You </h2>
         <a href="#" className="text-xs text-blue-600 font-medium hover:underline">
           See All
         </a>
       </div>
-      <ul>
+      <ul> 
         {suggestions.map((s, idx) => (
           <li
             key={s.username}

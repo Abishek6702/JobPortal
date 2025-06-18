@@ -1,51 +1,54 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import close from "../assets/close.svg"
-import {jwtDecode} from "jwt-decode";
+import close from "../assets/close.svg";
+import { jwtDecode } from "jwt-decode";
 import ExitConfirmation from "./ExitConfirmation";
 
 export default function JobPostForm() {
   const [companyOptions, setCompanyOptions] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [newQuestion, setNewQuestion] = useState("");
+
   const navigate = useNavigate();
   const steps = [
     "Company Info",
     "Job Info",
     "Requirements",
     "Benefits",
-    "Overview",
+    "Additional Info",
     "Submit",
   ];
   const [step, setStep] = useState(0);
 
   const [formData, setFormData] = useState({
     companyId: "",
-    companyName: "",
+    // companyName: "",
     position: "",
     location: "",
     workplace: "",
-    whereYouWillDoIt: "",
-    applyMethod: "",
-    reportingTo: [],
+    // whereYouWillDoIt: "",
+    // applyMethod: "",
+    // reportingTo: [],
     interviewProcess: "",
-    team: "",
+    // team: "",
     salaryRange: "",
-    tools: [],
+    // tools: [],
     additionalBenefits: [],
     jobDescription: [{ title: "", content: [""] }],
     requirements: [{ title: "", content: [""] }],
-    companyOverview: {
-      founded: "",
-      type: "",
-      industry: "",
-      sector: "",
-      revenue: "",
-      size: "",
-    },
+    // companyOverview: {
+    //   founded: "",
+    //   type: "",
+    //   industry: "",
+    //   sector: "",
+    //   revenue: "",
+    //   size: "",
+    // },
     deadlineToApply: "",
-    companyLogo: "",
-    companyImages: [],
+    // companyLogo: "",
+    // companyImages: [],
+    additionalInfo: [],
   });
 
   const handleChange = (field, value) => {
@@ -71,19 +74,14 @@ export default function JobPostForm() {
 
   const nextStep = () => setStep((s) => Math.min(s + 1, steps.length - 1));
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
-  //   const handleSubmit = () => console.log("Submitting:", formData);
+
   const handleSubmit = async () => {
-    console.log("Submitting:", formData);
     try {
       const token = localStorage.getItem("token");
-      console.log("token", token);
-
       const form = new FormData();
 
-      // Convert objects/arrays to strings
       const safeJSON = (value) => JSON.stringify(value ?? "");
 
-      // Append normal fields
       form.append("companyId", formData.companyId);
       form.append("companyName", formData.companyName);
       form.append("position", formData.position);
@@ -96,15 +94,14 @@ export default function JobPostForm() {
       form.append("salaryRange", formData.salaryRange);
       form.append("deadlineToApply", formData.deadlineToApply);
 
-      // Append JSON stringified fields
       form.append("reportingTo", safeJSON(formData.reportingTo));
       form.append("tools", safeJSON(formData.tools));
       form.append("additionalBenefits", safeJSON(formData.additionalBenefits));
       form.append("jobDescription", safeJSON(formData.jobDescription));
       form.append("requirements", safeJSON(formData.requirements));
       form.append("companyOverview", safeJSON(formData.companyOverview));
+      form.append("additionalInfo", safeJSON(formData.additionalInfo));
 
-      // Append files
       if (formData.companyLogo instanceof File) {
         form.append("companyLogo", formData.companyLogo);
       }
@@ -131,28 +128,22 @@ export default function JobPostForm() {
         throw new Error(data.message || "Something went wrong");
       }
 
-      // console.log("Job posted successfully:", data);
-      // // ✅ Show success (you can replace with toast/snackbar/etc.)
-      // alert("Job posted successfully!");
-
-      // ✅ Redirect to success page
       navigate("/job-sucess");
     } catch (err) {
       console.error("Submit error:", err.message);
     }
   };
+
   const handleClose = () => {
     setShowModal(true);
   };
 
   const handleConfirmExit = () => {
-    navigate(-1); // or any other logic
+    navigate(-1);
   };
-  
+
   useEffect(() => {
-    // Get user id from JWT
     const token = localStorage.getItem("token");
-    console.log("token", token);
     if (!token) return;
 
     let userId = null;
@@ -163,30 +154,30 @@ export default function JobPostForm() {
       console.error("Failed to decode token", err);
       return;
     }
-console.log("userid:",userId)
-    // Fetch all companies and filter by createdby
     fetch("http://localhost:3000/api/companies", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-    .then((res) => res.json())
-    .then((data) => {
-      // Check if createdBy is an object and extract the value
-      const filtered = data.filter((company) => {
-        return (
-          company.createdBy &&
-          company.createdBy.toString() === userId
-        );
-      });
-      setCompanyOptions(filtered);
-    })
-    .catch((err) => {
-      setCompanyOptions([]);
-      console.error("Error fetching companies:", err);
-    })
-    .finally(() => setLoadingCompanies(false));
-}, []);
+      .then((res) => res.json())
+      .then((data) => {
+        const filtered = data.filter((company) => {
+          return company.createdBy && company.createdBy.toString() === userId;
+        });
+        setCompanyOptions(filtered);
+      })
+      .catch((err) => {
+        setCompanyOptions([]);
+        console.error("Error fetching companies:", err);
+      })
+      .finally(() => setLoadingCompanies(false));
+  }, []);
+
+  useEffect(() => {
+    if (companyOptions.length > 0 && !formData.companyId) {
+      handleChange("companyId", companyOptions[0]._id);
+    }
+  }, [companyOptions]);
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-md mt-10">
@@ -207,29 +198,27 @@ console.log("userid:",userId)
               fill="black"
             />
           </svg>
-         <img src={close} className="cursor-pointer" onClick={handleClose}/>
-         {showModal && (
-        <ExitConfirmation
-          onConfirm={handleConfirmExit}
-          onCancel={() => setShowModal(false)}
-        />
-      )}
+          <img src={close} className="cursor-pointer" onClick={handleClose} />
+          {showModal && (
+            <ExitConfirmation
+              onConfirm={handleConfirmExit}
+              onCancel={() => setShowModal(false)}
+            />
+          )}
         </div>
       </div>
-      {/* <h2 className="text-2xl font-bold mb-4 text-center">Post a Job</h2> */}
-
       <div className="w-full bg-gray-200 h-2 rounded-full mb-6 mt-8">
         <div
           className="bg-blue-600 h-2 rounded-full"
           style={{ width: `${((step + 1) / steps.length) * 100}%` }}
         />
-      </div> 
+      </div>
       <p className="text-2xl font-bold mb-6 text-center">{steps[step]}</p>
 
       {/* Step 0: Company Info */}
       {step === 0 && (
         <div className="flex flex-col space-y-4 w-[80%] m-auto">
-          <div>
+          <div className="hidden">
             <label className="block text-lg font-semibold mb-1">
               Company ID
             </label>
@@ -247,19 +236,15 @@ console.log("userid:",userId)
               ))}
             </select>
           </div>
-
           <div>
-            <label className="block text-lg font-semibold mb-1">
-              Company Name
-            </label>
+            <label className="block text-lg font-semibold mb-1">Position</label>
             <input
-              className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none "
-              placeholder="Company Name"
-              value={formData.companyName}
-              onChange={(e) => handleChange("companyName", e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Position"
+              value={formData.position}
+              onChange={(e) => handleChange("position", e.target.value)}
             />
           </div>
-
           <div>
             <label className="block text-lg font-semibold mb-1">Location</label>
             <input
@@ -269,7 +254,6 @@ console.log("userid:",userId)
               onChange={(e) => handleChange("location", e.target.value)}
             />
           </div>
-
           <div>
             <label className="block text-lg font-semibold mb-1">
               Workplace
@@ -281,67 +265,12 @@ console.log("userid:",userId)
               onChange={(e) => handleChange("workplace", e.target.value)}
             />
           </div>
-
-          <div>
-            <label className="block text-lg font-semibold mb-1">
-              Where You’ll Work
-            </label>
-            <input
-              className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none "
-              placeholder="Where You’ll Work"
-              value={formData.whereYouWillDoIt}
-              onChange={(e) => handleChange("whereYouWillDoIt", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-lg font-semibold mb-1">
-              Company Logo
-            </label>
-            <input
-              type="file"
-              className="input w-full border border-gray-300 rounded-sm p-2 text-sm outline-none "
-              onChange={(e) => handleChange("companyLogo", e.target.files[0])}
-            />
-          </div>
         </div>
       )}
 
       {/* Step 1: Job Info */}
       {step === 1 && (
         <div className="flex flex-col space-y-6 w-full max-w-2xl mx-auto px-4">
-          <div>
-            <label className="block text-lg font-semibold mb-1">Position</label>
-            <input
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Position"
-              value={formData.position}
-              onChange={(e) => handleChange("position", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-lg font-semibold mb-1">
-              Apply Method URL
-            </label>
-            <input
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Apply Method URL"
-              value={formData.applyMethod}
-              onChange={(e) => handleChange("applyMethod", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-lg font-semibold mb-1">Team</label>
-            <input
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Team"
-              value={formData.team}
-              onChange={(e) => handleChange("team", e.target.value)}
-            />
-          </div>
-
           <div>
             <label className="block text-lg font-semibold mb-1">
               Salary Range
@@ -353,21 +282,6 @@ console.log("userid:",userId)
               onChange={(e) => handleChange("salaryRange", e.target.value)}
             />
           </div>
-
-          <div>
-            <label className="block text-lg font-semibold mb-1">
-              Reporting To (comma separated)
-            </label>
-            <input
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Reporting To (comma separated)"
-              value={formData.reportingTo.join(",")}
-              onChange={(e) =>
-                handleChange("reportingTo", e.target.value.split(","))
-              }
-            />
-          </div>
-
           <div>
             <label className="block text-lg font-semibold mb-1">
               Interview Process
@@ -377,18 +291,6 @@ console.log("userid:",userId)
               placeholder="Interview Process"
               value={formData.interviewProcess}
               onChange={(e) => handleChange("interviewProcess", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-lg font-semibold mb-1">
-              Tools (comma separated)
-            </label>
-            <input
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Tools (comma separated)"
-              value={formData.tools.join(",")}
-              onChange={(e) => handleChange("tools", e.target.value.split(","))}
             />
           </div>
         </div>
@@ -434,7 +336,6 @@ console.log("userid:",userId)
           >
             + Add Job Description Section
           </button>
-
           <h3 className="font-semibold text-lg mt-6">Requirements</h3>
           {formData.requirements.map((req, i) => (
             <div key={i} className="bg-gray-50 p-4 rounded space-y-2">
@@ -484,7 +385,6 @@ console.log("userid:",userId)
               }
             />
           </div>
-
           <div>
             <label className="block text-lg font-semibold mb-1">
               Deadline to Apply
@@ -496,77 +396,75 @@ console.log("userid:",userId)
               onChange={(e) => handleChange("deadlineToApply", e.target.value)}
             />
           </div>
+        </div>
+      )}
 
-          <div>
+      {/* Step 4: Additional Info */}
+      {step === 4 && (
+        <div className="">
+          <div className=" w-[50%] m-auto">
             <label className="block text-lg font-semibold mb-1">
-              Upload Company Images
+              Add a Question
             </label>
-            <input
-              type="file"
-              multiple
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm  outline-none"
-              onChange={(e) =>
-                handleChange("companyImages", Array.from(e.target.files))
-              }
-            />
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                placeholder="Type your question here"
+                className="flex-1 p-2 border border-gray-300 rounded outline-none shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (newQuestion.trim()) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      additionalInfo: [
+                        ...(prev.additionalInfo || []),
+                        newQuestion,
+                      ],
+                    }));
+                    setNewQuestion("");
+                  }
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Add
+              </button>
+            </div>
+            {formData.additionalInfo?.length > 0 && (
+              <ul className="list-disc pl-5 space-y-1">
+                {formData.additionalInfo.map((q, idx) => (
+                  <li key={idx} className="flex justify-between items-center">
+                    <span>{q}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = formData.additionalInfo.filter(
+                          (_, i) => i !== idx
+                        );
+                        setFormData((prev) => ({
+                          ...prev,
+                          additionalInfo: updated,
+                        }));
+                      }}
+                      className="text-red-500 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       )}
 
-      {step === 4 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { label: "Founded", key: "founded", placeholder: "e.g. 2005" },
-            { label: "Company Type", key: "type", placeholder: "e.g. Private" },
-            {
-              label: "Industry",
-              key: "industry",
-              placeholder: "e.g. Information Technology",
-            },
-            {
-              label: "Sector",
-              key: "sector",
-              placeholder: "e.g. Software Development",
-            },
-            {
-              label: "Revenue",
-              key: "revenue",
-              placeholder: "e.g. $10M - $50M",
-            },
-            {
-              label: "Company Size",
-              key: "size",
-              placeholder: "e.g. 51-200 employees",
-            },
-          ].map(({ label, key, placeholder }) => (
-            <div key={key}>
-              <label className="block text-lg font-semibold mb-1">
-                {label}
-              </label>
-              <input
-                type="text"
-                value={formData.companyOverview[key]}
-                placeholder={placeholder}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    companyOverview: {
-                      ...prev.companyOverview,
-                      [key]: e.target.value,
-                    },
-                  }))
-                }
-                className="w-full p-2 border border-gray-300 rounded outline-none shadow-sm"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
+      {/* Step 5: Review & Submit */}
       {step === 5 && (
         <div className="space-y-8">
           <p className="text-2xl font-bold text-center">Review Your Job Post</p>
-
           {/* Company Info */}
           <div className="bg-gray-100 p-4 rounded">
             <h3 className="text-lg font-semibold mb-2">Company Info</h3>
@@ -605,19 +503,12 @@ console.log("userid:",userId)
               <strong>Company ID:</strong> {formData.companyId}
             </p>
             <p>
-              <strong>Company Name:</strong> {formData.companyName}
-            </p>
-            <p>
               <strong>Location:</strong> {formData.location}
             </p>
             <p>
               <strong>Workplace:</strong> {formData.workplace}
             </p>
-            <p>
-              <strong>Apply Method:</strong> {formData.applyMethod}
-            </p>
           </div>
-
           {/* Job Info */}
           <div className="bg-gray-100 p-4 rounded">
             <h3 className="text-lg font-semibold mb-2">Job Info</h3>
@@ -625,22 +516,10 @@ console.log("userid:",userId)
               <strong>Position:</strong> {formData.position}
             </p>
             <p>
-              <strong>Where You'll Do It:</strong> {formData.whereYouWillDoIt}
-            </p>
-            <p>
-              <strong>Reporting To:</strong> {formData.reportingTo?.join(", ")}
-            </p>
-            <p>
               <strong>Interview Process:</strong> {formData.interviewProcess}
             </p>
             <p>
-              <strong>Team:</strong> {formData.team}
-            </p>
-            <p>
               <strong>Salary Range:</strong> {formData.salaryRange}
-            </p>
-            <p>
-              <strong>Tools:</strong> {formData.tools?.join(", ")}
             </p>
             {formData.deadlineToApply && (
               <p>
@@ -648,22 +527,20 @@ console.log("userid:",userId)
               </p>
             )}
           </div>
-
           {/* Job Description */}
           <div className="bg-gray-100 p-4 rounded">
             <h3 className="text-lg font-semibold mb-2">Job Description</h3>
-          {formData.jobDescription.map((desc, index) => (
-            <div key={index}>
-              <h4 className="font-bold">{desc.title}</h4>
-              <ul className="list-disc list-inside">
-                {desc.content.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            {formData.jobDescription.map((desc, index) => (
+              <div key={index}>
+                <h4 className="font-bold">{desc.title}</h4>
+                <ul className="list-disc list-inside">
+                  {desc.content.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-
           {/* Requirements */}
           <div className="bg-gray-100 p-4 rounded">
             <h3 className="text-lg font-semibold mb-2">Requirements</h3>
@@ -678,7 +555,6 @@ console.log("userid:",userId)
               </div>
             ))}
           </div>
-
           {/* Benefits */}
           <div className="bg-gray-100 p-4 rounded">
             <h3 className="text-lg font-semibold mb-2">Benefits</h3>
@@ -688,80 +564,64 @@ console.log("userid:",userId)
               ))}
             </ul>
           </div>
-
           {/* Company Overview */}
           <div className="bg-gray-100 p-4 rounded">
-            <h3 className="text-lg font-semibold mb-2">Company Overview</h3>
-            {Object.entries(formData.companyOverview || {}).map(
-              ([key, value]) => (
-                <p key={key}>
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>{" "}
-                  {value}
-                </p>
-              )
-            )}
+            <h3 className="text-lg font-semibold mb-2">Additional Information</h3>
+            <ul className="list-disc list-inside">
+              {formData.additionalInfo?.map((benefit, idx) => (
+                <li key={idx}>{benefit}</li>
+              ))}
+            </ul>
           </div>
           <div className="card_container  flex items-center space-x-20">
-           <div className="card ">
-           <div className="title mt-2 mb-4 p-2">
-              <p className="text-lg font-semibold ">Job Card Preview</p>
-            </div>
-            <div className="card-container border border-gray-300 rounded-md p-4 cursor-pointer mb-5">
-              {/* Top Row: Company Info & Bookmark */}
-              <div className="card-title flex items-center justify-between">
-                <div className="company-name flex gap-2">
-                  <img
-                    src={
-                      typeof formData.companyLogo === "string"
-                        ? formData.companyLogo
-                        : URL.createObjectURL(formData.companyLogo)
-                    }
-                    alt="Company Logo"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                  <p className="text-gray-500 font-medium">
-                    {" "}
-                    {formData.companyName}
+            <div className="card ">
+              <div className="title mt-2 mb-4 p-2">
+                <p className="text-lg font-semibold ">Job Card Preview</p>
+              </div>
+              <div className="card-container border border-gray-300 rounded-md p-4 cursor-pointer mb-5">
+                <div className="card-title flex items-center justify-between">
+                  {/* <div className="company-name flex gap-2">
+                    <img
+                      src={
+                        typeof formData.companyLogo === "string"
+                          ? formData.companyLogo
+                          : URL.createObjectURL(formData.companyLogo)
+                      }
+                      alt="Company Logo"
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                    <p className="text-gray-500 font-medium">
+                      {" "}
+                      {formData.companyName}
+                    </p>
+                  </div> */}
+                </div>
+                <div className="card-body mt-4">
+                  <p className="text-xl md:text-2xl font-semibold">
+                    {formData.position}
+                  </p>
+                  <p className="font-medium text-gray-600">
+                    {formData.location} ({formData.workplace})
                   </p>
                 </div>
-              </div>
-
-              {/* Position & Location */}
-              <div className="card-body mt-4">
-                <p className="text-xl md:text-2xl font-semibold">
-                  {formData.position}
-                </p>
-                <p className="font-medium text-gray-600">
-                  {formData.location} ({formData.workplace})
-                </p>
-              </div>
-
-              {/* Buttons and Posted Time */}
-              <div className="card-button flex items-center justify-between mt-4">
-                <div className="button flex flex-col md:flex-row gap-2 md:gap-4 w-full">
-                  <button
-                    className="border-2 border-[#0C9653] bg-white rounded-full py-2 px-4 text-green-700 font-bold  w-full md:w-auto"
-                 
-                  >
-                    {formData.applyMethod === "Easy Apply"
-                      ? "Easy Apply"
-                      : "Apply Link"}
-                  </button>
-                  <button className="border border-white rounded-full py-2 px-4 bg-green-100 text-green-700 font-bold  w-full md:w-auto">
-                    Multiple Candidate
-                  </button>
-                </div>
-                <div className="posted-date ml-4 whitespace-nowrap">
-                  <p className="text-sm text-black">
-                    0d
-                  </p>
+                <div className="card-button flex items-center justify-between mt-4">
+                  <div className="button flex flex-col md:flex-row gap-2 md:gap-4 w-full">
+                    <button className="border-2 border-[#0C9653] bg-white rounded-full py-2 px-4 text-green-700 font-bold  w-full md:w-auto">
+                      {formData.applyMethod === "Easy Apply"
+                        ? "Easy Apply"
+                        : "Apply Link"}
+                    </button>
+                    <button className="border border-white rounded-full py-2 px-4 bg-green-100 text-green-700 font-bold  w-full md:w-auto">
+                      Multiple Candidate
+                    </button>
+                  </div>
+                  <div className="posted-date ml-4 whitespace-nowrap">
+                    <p className="text-sm text-black">0d</p>
+                  </div>
                 </div>
               </div>
             </div>
-           </div>
-
           </div>
-
           {/* Submit Button */}
           <div className="text-center">
             <button
@@ -776,7 +636,6 @@ console.log("userid:",userId)
 
       {/* Navigation */}
       <div className="mt-8 flex justify-end w-[80%] m-auto p-2 ">
-        
         {step < steps.length - 1 && (
           <button
             className="px-4 py-2 rounded-full bg-[#2986CE] text-white"

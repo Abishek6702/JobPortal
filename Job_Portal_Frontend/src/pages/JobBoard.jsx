@@ -126,11 +126,11 @@ const JobBoard = () => {
         {/* Main Grid */}
         <div className="grid grid-cols-12 gap-6 relative">
           <div className="col-span-12 md:col-span-3">
-            <div className="bg-white border rounded-lg p-6 sticky top-10">
+            <div className="bg-white border border-gray-300 rounded-lg p-6 sticky top-10">
               <div className="flex justify-between items-center mb-4">
                 <span className="font-semibold text-lg">Filter</span>
                 <button
-                  className="text-red-500 text-sm"
+                  className="text-red-500 text-sm cursor-pointer hover:underline"
                   onClick={() =>
                     setFilters({
                       jobType: [],
@@ -150,7 +150,7 @@ const JobBoard = () => {
                 <select
                   value={filters.datePosted}
                   onChange={handleSelect}
-                  className="w-full border rounded px-2 py-1"
+                  className="w-full border rounded px-2 py-1 outline-none"
                 >
                   {filterOptions.datePosted.map((opt) => (
                     <option key={opt} value={opt}>
