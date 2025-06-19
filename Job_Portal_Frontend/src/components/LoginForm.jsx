@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import AutoCarousel from "./AutoCarousel";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
-
+import logo from "../assets/logomain.svg"
 const LoginForm = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +43,7 @@ const LoginForm = () => {
       const role = decoded.role;
       const onboardingComplete = decoded.onboardingstatus;
       console.log("token decoded", decoded);
-      toast.success("Login Sucessfull")
+      toast.success("Login Sucessfull");
 
       setSuccess("Login successful!");
 
@@ -77,14 +77,18 @@ const LoginForm = () => {
   return (
     <div className="main-container flex">
       <div className="left-container w-[100%] h-[100vh] flex align-center ">
-        <div className="content-container w-[100%] px-8 m-auto">
+      
+        <div className="content-container w-[100%] px-8 m-auto ">
+          <div className=" w-50 ">
+            <img src={logo} className="" />
+          </div>
           <p className="text-[32px] font-medium">Login to your account</p>
 
-          <form className="login-form mt-[30px]" onSubmit={handleLogin}>
+          <form className="login-form mt-[25px]" onSubmit={handleLogin}>
             <div className="email mb-2">
               <label
                 htmlFor="email"
-                className="text-sm font-medium text-gray-700"
+                className=" font-medium text-gray-700"
               >
                 E-mail Id
               </label>
@@ -101,7 +105,7 @@ const LoginForm = () => {
             <div className="password relative mb-2">
               <label
                 htmlFor="password"
-                className="text-sm font-medium text-gray-700"
+                className=" font-medium text-gray-700"
               >
                 Password
               </label>
@@ -117,12 +121,12 @@ const LoginForm = () => {
               <div className="icon absolute bottom-[11px] right-[20px] text-gray-500 hover:text-gray-700">
                 {showPassword ? (
                   <EyeOff
-                    className="h-5 w-5"
+                    className="h-5 w-5 cursor-pointer"
                     onClick={() => setShowPassword(false)}
                   />
                 ) : (
                   <Eye
-                    className="h-5 w-5"
+                    className="h-5 w-5 cursor-pointer"
                     onClick={() => setShowPassword(true)}
                   />
                 )}

@@ -3,6 +3,7 @@ import image from "../assets/verifyotp.png";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppProvider";
 import AutoCarousel from "./AutoCarousel";
+import logo from "../assets/logomain.svg"
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
@@ -53,6 +54,9 @@ const VerifyOtp = () => {
     <div className="md:grid grid-cols-2">
       <div className="left-container flex items-center justify-center h-[100vh]">
         <div className="content-container w-[90%] mb-[25px] space-y-4">
+          <div className="w-50">
+          <img src={logo} alt="" />
+        </div>
           <h1 className="text-[26px]">Verify Code</h1>
           <div className="space-y-4">
             <label className="text-[18px]">Enter Code</label>

@@ -1,35 +1,49 @@
 const mongoose = require("mongoose");
 
-const pastWorkSchema = new mongoose.Schema({
-  companyName: String,
+const educationSchema = new mongoose.Schema({
+  level: String,
+  institution: String,
+  university: String,
+  branch: String,
+  yearFrom: Number,
+  yearTo: Number,
+  marks: String,
+}, { _id: false });
+
+const experienceSchema = new mongoose.Schema({
+  company: String,
+  yearFrom: Number,
+  yearTo: Number,
+  title: String,
   location: String,
-  position: String,
-});
+  description: String,
+}, { _id: false });
+
+const questionAnswerSchema = new mongoose.Schema({
+  question: String,
+  answer: String,
+}, { _id: false });
 
 const applicationSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
-    companyId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
-      required: true,
-    },
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
+
     name: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String, required: true },
-    resume: { type: String, required: true }, // path to PDF
-    experience: { type: Number, required: true }, // years
-    pastWorkExperience: [pastWorkSchema],
-    relocation: { type: Boolean, default: false },
-    datesAvailable: [{ type: Date }],
     location: { type: String, required: true },
-    status: { type: String, default: "pending" }, // default status is 'pending'
-    rejectedAt: { type: Date }, // timestamp for when the application was rejected
+    
+    experience: { type: Number, required: true }, 
+    resume: { type: String, required: true },     
+
+    education: [educationSchema],
+    experienceDetails: [experienceSchema], 
+    questionsAndAnswers: [questionAnswerSchema],
+
+    status: { type: String, default: "pending" },
+    rejectedAt: { type: Date },
     notes: { type: String },
   },
   { timestamps: true }

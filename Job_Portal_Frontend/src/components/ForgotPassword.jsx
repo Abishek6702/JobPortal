@@ -3,6 +3,7 @@ import image from "../assets/forgotpassword.png";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppProvider";
 import AutoCarousel from "./AutoCarousel";
+import logo from "../assets/logomain.svg"
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -54,6 +55,9 @@ const ForgotPassword = () => {
     <div className="md:grid grid-cols-2">
       <div className="Left-container h-[100vh] flex items-center justify-center">
         <div className="content-container w-[90%] p-[8px] mb-[25px] space-y-4">
+          <div className="w-50">
+          <img src={logo} alt="" />
+        </div>
           <h1 className="text-[26px]">Forgot Password</h1>
 
           <div className="input-fields space-y-5">

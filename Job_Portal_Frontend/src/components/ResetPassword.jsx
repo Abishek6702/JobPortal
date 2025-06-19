@@ -3,6 +3,7 @@ import reset from "../assets/resetpassword.png";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppProvider";
 import AutoCarousel from "./AutoCarousel";
+import logo from "../assets/logomain.svg"
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -57,6 +58,9 @@ const ResetPassword = () => {
     <div className="main-container md:grid grid-cols-2">
       <div className="left-container h-[100vh] flex align-center">
         <div className="content-container w-[90%] m-auto">
+          <div className="w-50">
+          <img src={logo} alt="" />
+        </div>
           <p className="text-[32px] font-weight-400">Reset Password</p>
 
           <div className="login-form mt-[30px] space-y-4">

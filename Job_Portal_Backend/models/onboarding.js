@@ -46,4 +46,6 @@ const onboardingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Onboarding", onboardingSchema);
+// ✅ This prevents OverwriteModelError
+module.exports =
+  mongoose.models.Onboarding || mongoose.model("Onboarding", onboardingSchema);

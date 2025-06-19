@@ -308,7 +308,7 @@ const JobDetails = ({ onClose, job, isExpanded }) => {
                 <div className="col-span-1 sm:col-span-2 lg:col-span-6 grid grid-cols-2 gap-4 p-2">
                   {job.companyId.images
                     .slice(1, 5)
-                    .map((img, index) => (
+                    .map((img, index) => (    
                       <div key={index} className="h-[150px]">
                         <img
                           src={`http://localhost:3000/${img}`}

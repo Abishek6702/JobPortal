@@ -1,530 +1,420 @@
-import React, { useState } from "react";
-import "react-phone-input-2/lib/style.css";
+import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const JobApplicationForm = () => {
   const { state } = useLocation();
+  
   const job = state?.job;
-  const {
-    companyLogo,
-    companyName,
-    location: jobLocation,
-    position: jobTitle,
-  } = job || {};
-
+  console.log("job",job)
+  const companyId = job.companyId._id;
+  const jobId = job?._id;
   const navigate = useNavigate();
 
-  const steps = ["Personal Info", "Resume", "Job History", "Experience"];
+  const steps = ["Resume", "Additional Questions", "Preview"];
   const [step, setStep] = useState(0);
 
+  const [profile, setProfile] = useState({});
+  const [jobDetails, setJobDetails] = useState({});
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
     resume: null,
-    location: "",
-    job: { company: "", location: "", position: "" },
+    additionalAnswers: {},
     experience: "",
-    relocation: false,
-    interviewDates: [],
-    jobs: [],
+    location: "",
   });
-
+  const [showUpload, setShowUpload] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [errors, setErrors] = useState({});
+  const [age, setAge] = useState(null);
 
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
-  };
-
-  const handleNestedChange = (index, field, value) => {
-    setFormData((prevData) => {
-      const updatedJobs = [...prevData.jobs];
-      updatedJobs[index] = { ...updatedJobs[index], [field]: value };
-      return { ...prevData, jobs: updatedJobs };
-    });
-  };
-
-  const handleAddJobSet = () => {
-    setFormData((prevData) => ({
-      ...prevData,
-      jobs: [...prevData.jobs, { company: "", location: "", position: "" }],
-    }));
-  };
-
-  const handleRemoveJobSet = (index) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      jobs: prevData.jobs.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    handleChange("resume", e.target.files[0]);
-    setErrors((prevErrors) => ({ ...prevErrors, resume: "" }));
-  };
-
-  const validateStep1 = () => {
-    let newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.email) newErrors.email = "Email is required";
-    if (!formData.phone) newErrors.phone = "Phone is required";
-    if (!formData.location) newErrors.location = "Location is required";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateStep2 = () => {
-    let newErrors = {};
-    if (!formData.resume) {
-      newErrors.resume = "Resume is required";
+  // Decode JWT and fetch user profile
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    let userId;
+    try {
+      const decoded = jwtDecode(token);
+      userId = decoded.id;
+    } catch (err) {
+      return;
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    fetch(`http://localhost:3000/api/auth/${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProfile(data);
+        setFormData((prev) => ({
+          ...prev,
+          resume: data.onboarding?.resume || null,
+        }));
+        const dob = data.onboarding?.dob;
+        if (dob) {
+          const birthDate = new Date(dob);
+          const today = new Date();
+          let userAge = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            userAge--;
+          }
+          setAge(userAge);
+        }
+      });
+  }, []);
+
+  // Handle resume file change
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData((prev) => ({ ...prev, resume: file }));
+    setShowUpload(false);
+    if (file && file.type === "application/pdf") {
+      const fileReader = new FileReader();
+      fileReader.onload = (event) => setPreviewUrl(event.target.result);
+      fileReader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
-  const validateStep3 = () => {
-    // Removed validation for step 3
-    return true;
+  // Handle additional question answers
+  const handleAdditionalAnswer = (key, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      additionalAnswers: { ...prev.additionalAnswers, [key]: value },
+    }));
   };
 
-  const validateStep4 = () => {
+  // Handle experience change
+  const handleExperienceChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      experience: e.target.value,
+    }));
+  };
+
+  // Handle location change
+  const handleLocationChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      location: e.target.value,
+    }));
+  };
+
+  // Validation
+  const validateStep = () => {
     let newErrors = {};
-    if (!formData.experience) newErrors.experience = "Experience is required";
-    if (formData.interviewDates.length === 0)
-      newErrors.interviewDates = "Atleast select one date";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateForm = () => {
-    let newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.email) newErrors.email = "Email is required";
-    if (!formData.phone) newErrors.phone = "Phone is required";
-    if (!formData.location) newErrors.location = "Location is required";
-    if (!formData.resume) newErrors.resume = "Resume is required";
-    if (!formData.experience) newErrors.experience = "Experience is required";
-    if (formData.interviewDates.length === 0)
-      newErrors.interviewDates = "Atleast select one date";
-
+    if (step === 0 && !formData.resume) newErrors.resume = "Resume is required";
+    if (step === 1 && job?.additional3Info) {
+      job.additionalInfo.forEach((q, idx) => {
+        if (!formData.additionalAnswers[idx]) {
+          newErrors[idx] = "This field is required";
+        }
+      });
+      if (!formData.experience) newErrors.experience = "Experience is required";
+      if (!formData.location) newErrors.location = "Location is required";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const nextStep = () => {
-    let isValid = true;
-    if (step === 0) isValid = validateStep1();
-    if (step === 1) isValid = validateStep2();
-    if (step === 2) isValid = true; // Removed validation for step 3
-    if (step === 3) isValid = validateStep4();
-
-    if (isValid) {
-      setStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
-    }
+    if (validateStep()) setStep((prev) => Math.min(prev + 1, steps.length - 1));
   };
 
-  const prevStep = () => {
-    setStep((prevStep) => Math.max(prevStep - 1, 0));
-  };
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 0));
 
-  const handleSubmit = async () => {
-    if (step === 2) {
-      nextStep();
+  // Submit handler
+const handleSubmit = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("You need to log in first!");
+    navigate("/login");
+    return;
+  }
+
+  // Prepare questions and answers
+  const questionsAndAnswers = job?.additionalInfo?.map((q, idx) => ({
+    question: q,
+    answer: formData.additionalAnswers[idx] || "Not specified",
+  })) || [];
+
+  // Prepare FormData
+  const data = new FormData();
+  data.append("jobId", job?._id);
+  data.append("companyId", job?.companyId?._id);
+  data.append("name", 
+    profile.onboarding?.firstName
+      ? `${profile.onboarding.firstName} ${profile.onboarding.lastName || ""}`
+      : profile.name
+  );
+  data.append("email", profile.email);
+  data.append("phone", profile.phone);
+  data.append("experience", formData.experience);
+  data.append("location", formData.location);
+  data.append("questionsAndAnswers", JSON.stringify(questionsAndAnswers));
+
+  // Handle resume - new file or existing path
+  if (formData.resume) {
+    if (typeof formData.resume === "string") {
+      data.append("resumePath", formData.resume); // Existing resume path
+    } else {
+      data.append("resume", formData.resume); // New file upload
     }
-    if (!validateForm()) {
-      return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:3000/api/applications", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Don't set Content-Type - browser sets it automatically
+      },
+      body: data,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Submission failed");
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("No authentication token found.");
-      return;
-    }
+    alert("Application submitted!");
+    navigate("/submitsucess");
+  } catch (error) {
+    alert("Error: " + error.message);
+    console.error("Submission error:", error);
+  }
+};
 
-    const submissionData = {
-      jobId: job?._id,
-      companyId: job?.companyId,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      experience: formData.experience,
-      relocation: formData.relocation,
-      datesAvailable: formData.interviewDates,
-      location: formData.location,
-      pastWorkExperience: formData.jobs.map((job) => ({
-        companyName: job.company,
-        location: job.location,
-        position: job.position,
-      })),
-      resume: formData.resume,
-    };
 
-    try {
-      const formDataToSubmit = new FormData();
-      Object.keys(submissionData).forEach((key) => {
-        if (key === "resume" && submissionData[key]) {
-          formDataToSubmit.append(key, submissionData[key]);
-        } else if (Array.isArray(submissionData[key])) {
-          formDataToSubmit.append(key, JSON.stringify(submissionData[key]));
-        } else {
-          formDataToSubmit.append(key, submissionData[key]);
-        }
-      });
 
-      const response = await fetch("http://localhost:3000/api/applications", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formDataToSubmit,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit the application.");
+  // Helper: get resume file name
+  const getResumeName = () => {
+    if (formData.resume) {
+      if (typeof formData.resume === "string") {
+        return formData.resume.split("/").pop();
       }
-
-      const result = await response.json();
-      console.log("Submission Result:", result);
-      navigate("/submitsucess");
-    } catch (error) {
-      console.error("Error submitting the form:", error);
-      alert(`Error submitting the application: ${error.message}`);
+      return formData.resume.name;
     }
+    return profile.onboarding?.resume?.split("/").pop() || "Not uploaded";
   };
+
+  // Helper: get resume URL for preview
+  const getResumeUrl = () => {
+    if (previewUrl) return previewUrl;
+    if (formData.resume && typeof formData.resume === "string") {
+      return `http://localhost:3000/${formData.resume.replace(/\\/g, "/")}`;
+    }
+    if (profile.onboarding?.resume) {
+      return `http://localhost:3000/${profile.onboarding.resume.replace(
+        /\\/g,
+        "/"
+      )}`;
+    }
+    return null;
+  };
+
+  // Note: Fix any typos like use3Navigate, setPreviewUrl =3, localStorage.getItem3, job.additional3Info, etc.
+  // These should be useNavigate, setPreviewUrl, localStorage.getItem, job.additionalInfo, etc.
 
   return (
     <div className="flex justify-center items-center px-4 mt-2">
       <div className="w-full max-w-[60%]">
-        {/* Back Button */}
-        <div className="mb-4">
-          <button className="cursor-pointer" onClick={() => navigate(-1)}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="black"
-              className="bi bi-arrow-left"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fillRule="evenodd"
-                d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
-              />
-            </svg>
-          </button>
-        </div>
-
         {/* Company Info */}
         <div>
           <div className="flex items-center gap-2">
-            <img
-              src={`http://localhost:3000/${companyLogo}`}
-              className="w-10 h-10 border rounded-full border-gray-400"
-              alt="Company Logo"
-            />
-            <h1 className="text-gray-600 font-medium text-xl">{companyName}</h1>
+            {job?.companyId?.company_logo && (
+              <img
+                src={`http://localhost:3000/${job.companyId.company_logo}`}
+                className="w-10 h-10 border rounded-full border-gray-400"
+                alt="Company Logo"
+              />
+            )}
+            <h1 className="text3-gray-600 font-medium text-xl">
+              {job?.companyId?.company_name || jobDetails.companyName}
+            </h1>
           </div>
-          <h1 className="font-medium text-2xl mt-[1%] md:text-3xl ">{jobTitle}</h1>
-          <h1 className="text-gray-400 mt-[1%] font-medium text-lg">{jobLocation}</h1>
+          <h1 className="font-medium text-2xl mt-[1%] md:text-3xl">
+            {job?.position || jobDetails.position}
+          </h1>
+          <h1 className="text-gray-400 mt-[1%] font-medium text-lg">
+            {job?.location || jobDetails.location}
+          </h1>
         </div>
         <hr className="border-t border-gray-400 mt-4 mb-2" />
 
-        {/* Form */}
-        <div className="">
-          <div className="flex items-center justify-between"></div>
-          <div className="w-[75%] bg-gray-200 h-2 rounded-full m-auto mb-6 mt-8">
-            <div
-              className="bg-blue-600 h-2 rounded-full "
-              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
-            />
+        {/* Progress Bar */}
+        <div className="w-[75%] bg-gray-200 h-2 rounded-full m-auto mb-6 mt-8">
+          <div
+            className="bg-blue-600 h-2 rounded-full"
+            style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+          />
+        </div>
+        <p className="text-2xl font-bold mb-6 text-center">{steps[step]}</p>
+
+        {/* Step 0: Resume Preview and Change */}
+        {step === 0 && (
+          <div className="flex flex-col space-y-4 w-[80%] m-auto">
+            <label className="text-lg font-semibold">Resume</label>
+            {getResumeUrl() && (
+              <iframe
+                src={getResumeUrl()}
+                title="Resume Preview"
+                className="w-full h-[80vh] border rounded"
+              />
+            )}
+            <button
+              className="bg-gray-200 px-4 py-2 rounded hover:bg3-gray-300 mt-4"
+              onClick={() => setShowUpload(true)}
+            >
+              Change Resume
+            </button>
+            {showUpload && (
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="block mt-2"
+                onChange={handleFileChange}
+              />
+            )}
+            {errors.resume && (
+              <p className="text-red-500 text-sm">{errors.resume}</p>
+            )}
           </div>
+        )}
 
-          <p className="text-2xl font-bold mb-6 text-center">{steps[step]}</p>
-
-          {step === 0 && (
-            <div className="flex flex-col space-y-4 w-[80%] m-auto">
-              <div>
-                <label className="block text-lg font-semibold mb-1">Name</label>
+        {/* Step 1: Additional Questions */}
+        {step === 1 && (
+          <div className="flex flex-wrap gap-4 w-[80%] m-auto">
+            {job?.additionalInfo?.map((question, idx) => (
+              <div key={idx} className="w-[48%]">
+                <label className="block text-lg font-semibold mb-1">
+                  {question}
+                </label>
                 <input
-                  className={`border ${errors.name ? "border-red-500" : "border-gray-300"
-                    } rounded-sm p-2 text-sm w-full`}
-                  placeholder="Enter your name"
-                  value={formData.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
+                  type="text"
+                  className={`border ${
+                    errors[idx] ? "border-red-500" : "border-gray-300"
+                  } rounded-sm p-2 text-sm w-full`}
+                  value={formData.additionalAnswers?.[idx] || ""}
+                  onChange={(e) => handleAdditionalAnswer(idx, e.target.value)}
+                  placeholder="Type your answer..."
                 />
-                {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name}</p>
+                {errors[idx] && (
+                  <p className="text-red-500 text-sm">{errors[idx]}</p>
                 )}
               </div>
-
-              <div>
-                <label className="block text-lg font-semibold mb-1">Email</label>
+            ))}
+            <div className="otherdetails w-full flex gap-4">
+              <div className="w-[48%]">
+                <label className="block text-lg font-semibold mb-1">
+                  Total Year of experience
+                </label>
                 <input
-                  className={`border ${errors.email ? "border-red-500" : "border-gray-300"
-                    } rounded-sm p-2 text-sm w-full`}
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
+                  type="number"
+                  className={`border ${
+                    errors.experience ? "border-red-500" : "border-gray-300"
+                  } rounded-lg outline-none p-2 w-full`}
+                  value={formData.experience}
+                  onChange={handleExperienceChange}
+                  placeholder="Year of Experience"
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email}</p>
+                {errors.experience && (
+                  <p className="text-red-500 text-sm">{errors.experience}</p>
                 )}
               </div>
-
-              <div>
-                <label className="block text-lg font-semibold mb-1">Phone</label>
+              <div className="w-[48%]">
+                <label className="block text-lg font-semibold mb-1">
+                  Current Location
+                </label>
                 <input
-                  className={`border ${errors.phone ? "border-red-500" : "border-gray-300"
-                    } rounded-sm p-2 text-sm w-full`}
-                  placeholder="Enter your phone number"
-                  value={formData.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                />
-                {errors.phone && (
-                  <p className="text-red-500 text-sm">{errors.phone}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-lg font-semibold mb-1">Location</label>
-                <input
-                  className={`border ${errors.location ? "border-red-500" : "border-gray-300"
-                    } rounded-sm p-2 text-sm w-full`}
-                  placeholder="Enter your current location"
+                  type="text"
+                  className={`border ${
+                    errors.location ? "border-red-500" : "border-gray-300"
+                  } rounded-lg outline-none p-2 w-full`}
                   value={formData.location}
-                  onChange={(e) => handleChange("location", e.target.value)}
+                  onChange={handleLocationChange}
+                  placeholder="Enter Your Location"
                 />
                 {errors.location && (
                   <p className="text-red-500 text-sm">{errors.location}</p>
                 )}
               </div>
             </div>
-          )}
-
-          {step === 1 && (
-            <div className="flex flex-col space-y-4 w-[80%] m-auto">
-              <label className="text-lg font-semibold">Upload Resume</label>
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className={`border ${errors.resume ? "border-red-500" : "border-gray-300"
-                  } rounded-sm p-2 text-sm`}
-              />
-              {errors.resume && (
-                <p className="text-red-500 text-sm">{errors.resume}</p>
-              )}
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="flex flex-col space-y-4 w-[80%] m-auto">
-              <label className="block text-lg font-semibold mb-3">
-                Job Information
-              </label>
-
-              {formData.jobs.map((job, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col space-y-4 border-b border-gray-300 pb-4 mb-4"
-                >
-                  <div>
-                    <label className="block text-sm font-semibold">
-                      Company Name
-                    </label>
-                    <input
-                      className={`border ${errors[`company-${index}`]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        } rounded-sm p-2 text-sm w-full`}
-                      placeholder="Company Name"
-                      value={job.company}
-                      onChange={(e) =>
-                        handleNestedChange(index, "company", e.target.value)
-                      }
-                    />
-                    {errors[`company-${index}`] && (
-                      <p className="text-red-500 text-sm">
-                        {errors[`company-${index}`]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold">Location</label>
-                    <input
-                      className={`border ${errors[`location-${index}`]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        } rounded-sm p-2 text-sm w-full`}
-                      placeholder="Location"
-                      value={job.location}
-                      onChange={(e) =>
-                        handleNestedChange(index, "location", e.target.value)
-                      }
-                    />
-                    {errors[`location-${index}`] && (
-                      <p className="text-red-500 text-sm">
-                        {errors[`location-${index}`]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold">Position</label>
-                    <input
-                      className={`border ${errors[`position-${index}`]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        } rounded-sm p-2 text-sm w-full`}
-                      placeholder="Position"
-                      value={job.position}
-                      onChange={(e) =>
-                        handleNestedChange(index, "position", e.target.value)
-                      }
-                    />
-                    {errors[`position-${index}`] && (
-                      <p className="text-red-500 text-sm">
-                        {errors[`position-${index}`]}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveJobSet(index)}
-                    className="text-red-500 text-sm mt-2"
-                  >
-                    Remove this work experience
-                  </button>
-                </div>
-              ))}
-
-              {errors.jobs && (
-                <p className="text-red-500 text-sm">{errors.jobs}</p>
-              )}
-
-              <button
-                type="button"
-                onClick={handleAddJobSet}
-                className="bg-blue-500 text-white rounded-sm py-2 px-4 mt-4"
-              >
-                Add past work experience
-              </button>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="flex flex-col space-y-4 w-[80%] m-auto">
-              <div>
-                <label className="block text-lg font-semibold mb-1">
-                  Years of Experience
-                </label>
-                <input
-                  className={`border ${errors.experience ? "border-red-500" : "border-gray-300"
-                    } rounded-sm p-2 text-sm w-full`}
-                  placeholder="Years of Experience"
-                  value={formData.experience}
-                  onChange={(e) => handleChange("experience", e.target.value)}
-                />
-                {errors.experience && (
-                  <p className="text-red-500 text-sm">{errors.experience}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-lg font-semibold mb-1">
-                  Open to Relocation
-                </label>
-                <select
-                  className="border border-gray-300 rounded-sm p-2 text-sm w-full"
-                  value={formData.relocation ? "yes" : "no"}
-                  onChange={(e) =>
-                    handleChange("relocation", e.target.value === "yes")
-                  }
-                >
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-lg font-semibold mb-1">
-                  Available Interview Dates
-                </label>
-                <input
-                  type="date"
-                  className={`border ${errors.interviewDates
-                      ? "border-red-500"
-                      : "border-gray-300"
-                    } rounded-sm p-2 text-sm w-full mb-2`}
-                  onChange={(e) => {
-                    const selectedDate = e.target.value;
-                    handleChange(
-                      "interviewDates",
-                      formData.interviewDates
-                        ? [...formData.interviewDates, selectedDate]
-                        : [selectedDate]
-                    );
-                  }}
-                />
-                {errors.interviewDates && (
-                  <p className="text-red-500 text-sm">{errors.interviewDates}</p>
-                )}
-
-                {formData.interviewDates &&
-                  formData.interviewDates.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {formData.interviewDates.map((date, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-400 text-white text-sm rounded-full px-3 py-1 flex items-center gap-2"
-                        >
-                          {date}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updatedDates =
-                                formData.interviewDates.filter(
-                                  (d) => d !== date
-                                );
-                              handleChange("interviewDates", updatedDates);
-                            }}
-                            className="bg-red-500 text-white rounded-full p-1 w-4 h-4 flex items-center justify-center"
-                          >
-                            &times;
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-between mt-6">
-            <button
-              className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              onClick={prevStep}
-              disabled={step === 0}
-            >
-              Previous
-            </button>
-            {step === steps.length - 1 ? (
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                onClick={handleSubmit}
-              >
-                Submit
-              </button>
-            ) : (
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                onClick={nextStep}
-              >
-                Next
-              </button>
-            )}
           </div>
+        )}
+
+        {/* Step 2: Preview */}
+        {step === 2 && (
+          <div className="flex flex-col space-y-4 w-[80%] m-auto">
+            <h2 className="text-xl font-semibold mb-2">Preview Your Details</h2>
+            <div className="bg-gray-100 p-4 rounded">
+              <p>
+                <span className="font-semibold">Name: </span>
+                {profile.onboarding?.firstName
+                  ? `${profile.onboarding.firstName} ${
+                      profile.onboarding.lastName || ""
+                    }`
+                  : profile.name}
+              </p>
+              <p>
+                <span className="font-semibold">Email: </span>
+                {profile.email}
+              </p>
+              <p>
+                <span className="font-semibold">Phone: </span>
+                {profile.phone}
+              </p>
+              {job?.additionalInfo?.map((q, idx) => (
+                <p key={idx}>
+                  <span className="font-semibold">{q}: </span>
+                  {formData.additionalAnswers[idx] || "Not specified"}
+                </p>
+              ))}
+              <p>
+                <span className="font-semibold">Total Year of Experience: </span>
+                {formData.experience || "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Current Location: </span>
+                {formData.location || "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Resume: </span>
+                {getResumeName()}
+              </p>
+              {getResumeUrl() && (
+                <iframe
+                  src={getResumeUrl()}
+                  title="Resume Preview"
+                  className="w-full h-[80vh] border rounded mt-4"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between mt-6">
+          <button
+            className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            onClick={prevStep}
+            disabled={step === 0}
+          >
+            Previous
+          </button>
+          {step === steps.length - 1 ? (
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              onClick={handleSubmit}
+            >
+              Submit
+            </button>
+          ) : (
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              onClick={nextStep}
+            >
+              Next
+            </button>
+          )}
         </div>
       </div>
     </div>

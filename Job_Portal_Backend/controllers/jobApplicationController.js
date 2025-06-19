@@ -2,7 +2,9 @@ const mongoose = require("mongoose");
 const Application = require("../models/JobApplication");
 const User = require("../models/User");
 const Job = require("../models/job");
+const Onboarding = require("../models/Onboarding");
 const sendStatusEmail = require("../utils/sendStatusMail");
+const path = require("path");
 
 exports.createApplication = async (req, res) => {
   try {
@@ -13,37 +15,35 @@ exports.createApplication = async (req, res) => {
       email,
       phone,
       experience,
-      pastWorkExperience,
-      relocation,
-      datesAvailable,
       location,
+      questionsAndAnswers,
     } = req.body;
 
-    // Parse past work experience and available dates
-    const parsedPastWorkExperience = JSON.parse(pastWorkExperience);
-    const parsedDatesAvailable = JSON.parse(datesAvailable).map(
-      (date) => new Date(date)
-    );
-
-    // Check if the user has already applied for this job
+    let resume;
+    if (req.file) {
+      resume = req.file.filename; // New upload
+    } else if (req.body.resumePath) {
+      resume = req.body.resumePath; // Existing resume
+    } else {
+      return res.status(400).json({ message: "Resume is required." });
+    }
     const existingApplication = await Application.findOne({
       userId: req.user._id,
-      jobId: jobId,
+      jobId,
     });
-
-    // If application already exists, send a conflict response
     if (existingApplication) {
       return res
         .status(409)
         .json({ message: "You have already applied for this job." });
     }
 
-    // Get the resume path
-    const resume = req.file?.path;
-    if (!resume)
-      return res.status(400).json({ message: "Resume file is required." });
+    const onboarding = await Onboarding.findOne({
+      userId: req.user._id,
+    }).select("education experience");
+    if (!onboarding) {
+      return res.status(404).json({ message: "Onboarding data not found." });
+    }
 
-    // Create a new application
     const newApp = new Application({
       userId: req.user._id,
       jobId,
@@ -51,24 +51,23 @@ exports.createApplication = async (req, res) => {
       name,
       email,
       phone,
-      resume,
-      experience,
       location,
-      pastWorkExperience: parsedPastWorkExperience,
-      relocation,
-      datesAvailable: parsedDatesAvailable,
+      experience,
+      resume,
+      education: onboarding.education,
+      experienceDetails: onboarding.experience,
+      questionsAndAnswers: JSON.parse(questionsAndAnswers || "[]"),
     });
 
-    // Save the new application
     const savedApp = await newApp.save();
 
-    // Add job ID to user's appliedJobs array (if needed)
     await User.findByIdAndUpdate(req.user._id, {
       $addToSet: { appliedJobs: jobId },
     });
 
     res.status(201).json(savedApp);
   } catch (err) {
+    console.error("Application creation error:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -81,8 +80,9 @@ exports.getAllApplications = async (req, res) => {
     const applicationsWithDownloadLink = applications.map((app) => {
       const resumeDownloadLink = `http://localhost:3000/download/${app._id}`;
       return {
-        ...app.toObject(), // Convert Mongoose document to plain object
-        resumeDownloadLink, // Add the download link
+        ...app.toObject(),
+
+        resumeDownloadLink,
       };
     });
     res.status(200).json(applicationsWithDownloadLink);
@@ -181,19 +181,23 @@ exports.downloadResume = async (req, res) => {
       return res.status(404).json({ message: "Resume not found" });
     }
 
-    // Set headers to force download
+    const resumePath = path.join(
+      __dirname,
+      "../uploads/resumes",
+      application.resume
+    );
+
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="resume-${application._id}.pdf"`
     );
 
-    // Send the file
-    res.sendFile(application.resume, { root: "." });
+    res.sendFile(resumePath);
   } catch (err) {
+    console.error("Download error:", err);
     res.status(500).json({ error: err.message });
   }
 };
-
 exports.updateApplicationStatus = async (req, res) => {
   try {
     const { status, notes } = req.body;
@@ -235,7 +239,7 @@ exports.updateApplicationStatus = async (req, res) => {
     await application.save();
 
     // Send email if the status is selected, rejected, or not selected
-    
+
     try {
       if (["selected", "rejected", "not selected"].includes(status)) {
         console.log("controller application email", application.email);
@@ -305,12 +309,16 @@ exports.bulkUpdateApplicationStatus = async (req, res) => {
     }
 
     // Fetch job titles for applications
-    const jobTitles = await Job.find({ _id: { $in: applications.map(app => app.jobId) } })
+    const jobTitles = await Job.find({
+      _id: { $in: applications.map((app) => app.jobId) },
+    })
       .lean()
-      .then(jobs => jobs.reduce((acc, job) => {
-        acc[job._id] = job.position;
-        return acc;
-      }, {}));
+      .then((jobs) =>
+        jobs.reduce((acc, job) => {
+          acc[job._id] = job.position;
+          return acc;
+        }, {})
+      );
 
     // Perform the update
     await Application.updateMany({ _id: { $in: ids } }, { $set: updateData });
@@ -320,7 +328,10 @@ exports.bulkUpdateApplicationStatus = async (req, res) => {
       try {
         // Fetch job title from the cached job titles
         const jobTitle = jobTitles[app.jobId];
-        if (jobTitle && ["selected", "rejected", "not selected"].includes(status)) {
+        if (
+          jobTitle &&
+          ["selected", "rejected", "not selected"].includes(status)
+        ) {
           await sendStatusEmail(app.email, status, app.name, jobTitle);
         }
       } catch (emailErr) {

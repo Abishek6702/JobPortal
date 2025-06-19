@@ -3,7 +3,7 @@ import { Eye, EyeOff, UserRound, Building2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AutoCarousel from "./AutoCarousel";
 import { toast } from 'react-toastify';
-
+import logo from "../assets/logomain.svg"
 const SignupForm = () => {
   const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
@@ -179,7 +179,11 @@ const SignupForm = () => {
 
   return (
     <div className="w-[100%] h-[100vh] flex  bg-gray-50">
+    
       <div className="w-[100%]  bg-white px-8 rounded-lg shadow-md">
+        <div className="w-50">
+          <img src={logo} alt="" />
+        </div>
         {!showOtpField ? (
           <>
             <div className=" bg-gray-100 p-1 rounded-lg flex mb-6 mt-4">
